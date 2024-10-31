@@ -94,20 +94,29 @@ class IntegrationVersionController extends Controller
 
     public function getLatestHash()
     {
-        $this->validate(request(), [
-            'source' => 'required'
-        ]);
-        $source = request()->get('source');
+        try {
+            $message = 'Success';
+            $isError = false;
+            $this->validate(request(), [
+                'source' => 'required'
+            ]);
+            $source = request()->get('source');
 
-        $hash = '';
-        $updatedAt = '';
-        $item = $this->integrationVersionRepository->getItemBySource($source);
-        if($item && $item->getHash()) {
-            $hash = $item->getHash();
-            $updatedAt = $item->getUpdatedAtValue();
+            $hash = '';
+            $updatedAt = '';
+            $item = $this->integrationVersionRepository->getItemBySource($source);
+            if($item && $item->getHash()) {
+                $hash = $item->getHash();
+                $updatedAt = $item->getUpdatedAtValue();
+            }
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $isError = true;
         }
 
         return new JsonResponse([
+            'is_error' => $isError,
+            'message' => $message,
             'hash' => $hash,
             'updated_at' => $updatedAt
         ]);
