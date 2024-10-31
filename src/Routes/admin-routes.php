@@ -8,4 +8,7 @@ Route::group([
 
     Route::post('get-identities', [\IntegrationHelper\IntegrationVersionLaravelServer\Http\Controllers\Admin\IntegrationVersionController::class, 'getIdentities'])
         ->name('admin.integration.version.identities');
+
+    Route::post('get-latest-hash', [\IntegrationHelper\IntegrationVersionLaravelServer\Http\Controllers\Admin\IntegrationVersionController::class, 'getLatestHash'])
+        ->name('admin.integration.version.get-latest-hash');
 });

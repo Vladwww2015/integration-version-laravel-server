@@ -28,6 +28,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     public function register()
     {
         $this->registerCommands();
+        $this->registerConfig();
     }
 
     protected function registerCommands()
@@ -40,5 +41,17 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 RunReindexAll::class
             ]);
         }
+    }
+
+    /**
+     * Register package config.
+     *
+     * @return void
+     */
+    protected function registerConfig()
+    {
+        $this->mergeConfigFrom(
+            dirname(__DIR__) . '/Config/acl.php', 'acl'
+        );
     }
 }
