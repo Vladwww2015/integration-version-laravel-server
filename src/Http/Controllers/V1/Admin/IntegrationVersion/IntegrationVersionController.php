@@ -3,11 +3,10 @@
 namespace IntegrationHelper\IntegrationVersionLaravelServer\Http\Controllers\V1\Admin\IntegrationVersion;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
 use IntegrationHelper\IntegrationVersion\IntegrationVersionItemManagerInterface;
 use IntegrationHelper\IntegrationVersionLaravel\Repositories\IntegrationVersionRepository;
+use IntegrationHelper\IntegrationVersionLaravelServer\PrepareResultProcessor;
 use Webkul\RestApi\Http\Controllers\V1\Admin\AdminController;
 /**
  * @inheritDoc
@@ -39,16 +38,17 @@ class IntegrationVersionController extends AdminController
      */
     public function getIdentities()
     {
+        $identities = [];
+        $updatedAt = '';
+        $hash = '';
+        $isError = false;
+        $message = 'Success';
         try {
-            $updatedAt = '';
-            $hash = '';
-            $isError = false;
-            $message = 'Success';
             $this->validate(request(), [
                 'source' => 'required',
                 'old_hash' => 'required',
-                'page' => 'required|int|gt:1',
-                'limit' => 'required|int|gt:500',
+                'page' => 'required|int|gt:0',
+                'limit' => 'required|int|gt:499',
                 'updated_at' => 'required|date_format:Y-m-d H:i:s',
             ]);
 
@@ -58,7 +58,6 @@ class IntegrationVersionController extends AdminController
             $page = request()->get('page');
             $limit = request()->get('limit');
 
-            $identities = [];
             $item = $this->integrationVersionRepository->getItemBySource($source);
             if($item && $item->getIdValue()) {
                 $hash = $item->getHash();
@@ -83,18 +82,56 @@ class IntegrationVersionController extends AdminController
         ]);
     }
 
+    public function getDataByIdentities()
+    {
+        try {
+            $result = [];
+            $message = 'Success';
+            $isError = false;
+            $this->validate(request(), [
+                'source' => 'required',
+                'page' => 'required|int|gt:0',
+                'limit' => 'required|int|gt:499',
+                'identities' => 'required|array'
+            ]);
+            $source = request()->get('source');
+
+            $integrationVersion = $this->integrationVersionRepository->getItemBySource($source);
+            if(!$integrationVersion || !$integrationVersion->getIdValue()) {
+                throw new \Exception(sprintf('Integration version for source %s not found.', $source));
+            }
+            $identities = request()->get('identities');
+
+            $result = PrepareResultProcessor::getInstance()->prepare(
+                $source,
+                DB::table($integrationVersion->getTableName())
+                    ->whereIn($integrationVersion->getIdentityColumn(), $identities)->get()
+            ); //TODO TODO TODO upd with source connection
+
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $isError = true;
+        }
+
+        return new JsonResponse([
+            'is_error' => $isError,
+            'message' => $message,
+            'data' => $result
+        ]);
+    }
+
     public function getLatestHash()
     {
         try {
             $message = 'Success';
             $isError = false;
+            $hash = '';
+            $updatedAt = '';
             $this->validate(request(), [
                 'source' => 'required'
             ]);
             $source = request()->get('source');
 
-            $hash = '';
-            $updatedAt = '';
             $item = $this->integrationVersionRepository->getItemBySource($source);
             if($item && $item->getHash()) {
                 $hash = $item->getHash();

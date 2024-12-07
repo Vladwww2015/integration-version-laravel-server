@@ -9,5 +9,6 @@ Route::group([
     Route::controller(IntegrationVersionController::class)->group(function () {
         Route::post('get-identities', 'getIdentities');
         Route::post('get-latest-hash', 'getLatestHash');
+        Route::post('get-data-by-identities', 'getDataByIdentities');
     });
 });
