@@ -90,8 +90,6 @@ class IntegrationVersionController extends AdminController
             $isError = false;
             $this->validate(request(), [
                 'source' => 'required',
-                'page' => 'required|int|gt:0',
-                'limit' => 'required|int|gt:499',
                 'identities' => 'required|array'
             ]);
             $source = request()->get('source');
