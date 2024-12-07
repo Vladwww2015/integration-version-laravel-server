@@ -1,26 +1,19 @@
 <?php
 
-namespace IntegrationHelper\IntegrationVersionLaravelServer\Http\Controllers\Admin;
+namespace IntegrationHelper\IntegrationVersionLaravelServer\Http\Controllers\V1\Admin\IntegrationVersion;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use IntegrationHelper\IntegrationVersion\IntegrationVersionItemManagerInterface;
-use IntegrationHelper\IntegrationVersion\IntegrationVersionManagerInterface;
 use IntegrationHelper\IntegrationVersionLaravel\Repositories\IntegrationVersionRepository;
-
-
+use Webkul\RestApi\Http\Controllers\V1\Admin\AdminController;
 /**
  * @inheritDoc
  */
-class IntegrationVersionController extends Controller
+class IntegrationVersionController extends AdminController
 {
-    use AuthorizesRequests,
-        DispatchesJobs,
-        ValidatesRequests;
-
     /**
      * Contains route related configuration
      *
@@ -36,9 +29,7 @@ class IntegrationVersionController extends Controller
         protected IntegrationVersionRepository $integrationVersionRepository,
         protected IntegrationVersionItemManagerInterface $integrationVersionItemManager
     ) {
-        $this->middleware('admin');
-
-        $this->_config = request('_config');
+        parent::__construct();
     }
 
     /**

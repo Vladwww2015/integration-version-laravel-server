@@ -2,7 +2,7 @@
 
 namespace IntegrationHelper\IntegrationVersionLaravelServer\Providers;
 
-
+use Illuminate\Support\Facades\Route;
 use IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands\ResetIndex;
 use IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands\ResetIndexAll;
 use IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands\RunReindex;
@@ -10,6 +10,7 @@ use IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands\RunReinde
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
+
     /**
      * Bootstrap services.
      *
@@ -17,7 +18,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function boot()
     {
-        $this->loadRoutesFrom(__DIR__ . '/../Routes/admin-routes.php');
+
     }
 
     /**
@@ -27,6 +28,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function register()
     {
+        $this->mapApiRoutes();
         $this->registerCommands();
         $this->registerConfig();
     }
@@ -53,5 +55,12 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->mergeConfigFrom(
             dirname(__DIR__) . '/Config/acl.php', 'acl'
         );
+    }
+
+    protected function mapApiRoutes()
+    {
+        Route::prefix('api')
+            ->middleware('api')
+            ->group(__DIR__.'/../Routes/api.php');
     }
 }
