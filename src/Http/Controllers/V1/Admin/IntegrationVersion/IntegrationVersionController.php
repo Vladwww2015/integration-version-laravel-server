@@ -39,7 +39,7 @@ class IntegrationVersionController extends AdminController
     public function getIdentities()
     {
         $identities = [];
-        $updatedAt = '';
+        $hashDateTime = '';
         $hash = '';
         $isError = false;
         $message = 'Success';
@@ -49,21 +49,21 @@ class IntegrationVersionController extends AdminController
                 'old_hash' => 'required',
                 'page' => 'required|int|gt:0',
                 'limit' => 'required|int|gt:499',
-                'updated_at' => 'required|date_format:Y-m-d H:i:s',
+                'hash_date_time' => 'required|date_format:Y-m-d H:i:s',
             ]);
 
             $source = request()->get('source');
             $oldHash = request()->get('old_hash');
-            $updatedAtParam = request()->get('updated_at');
+            $hashDateTimeParam = request()->get('hash_date_time');
             $page = request()->get('page');
             $limit = request()->get('limit');
 
             $item = $this->integrationVersionRepository->getItemBySource($source);
             if($item && $item->getIdValue()) {
                 $hash = $item->getHash();
-                $updatedAt = $item->getUpdatedAtValue();
+                $hashDateTime = $item->getHashDateTime();
                 $identities = $this->integrationVersionItemManager
-                    ->getIdentitiesForNewestVersions($item->getIdValue(), $oldHash, $updatedAtParam, $page, $limit);
+                    ->getIdentitiesForNewestVersions($item->getIdValue(), $oldHash, $hashDateTimeParam, $page, $limit);
 
             }
         } catch (\Exception $e) {
@@ -76,7 +76,7 @@ class IntegrationVersionController extends AdminController
         return new JsonResponse([
             'identities' => $identities,
             'latest_hash' => $hash,
-            'updated_at' => $updatedAt,
+            'hash_date_time' => $hashDateTime,
             'message' => $message,
             'is_error' => $isError
         ]);
@@ -124,7 +124,7 @@ class IntegrationVersionController extends AdminController
             $message = 'Success';
             $isError = false;
             $hash = '';
-            $updatedAt = '';
+            $hashDateTime = '';
             $this->validate(request(), [
                 'source' => 'required'
             ]);
@@ -133,7 +133,7 @@ class IntegrationVersionController extends AdminController
             $item = $this->integrationVersionRepository->getItemBySource($source);
             if($item && $item->getHash()) {
                 $hash = $item->getHash();
-                $updatedAt = $item->getUpdatedAtValue();
+                $hashDateTime = $item->getHashDateTime();
             }
         } catch (\Exception $e) {
             $message = $e->getMessage();
@@ -144,7 +144,7 @@ class IntegrationVersionController extends AdminController
             'is_error' => $isError,
             'message' => $message,
             'hash' => $hash,
-            'updated_at' => $updatedAt
+            'hash_date_time' => $hashDateTime
         ]);
     }
 
