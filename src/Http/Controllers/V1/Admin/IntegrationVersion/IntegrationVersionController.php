@@ -5,6 +5,7 @@ namespace IntegrationHelper\IntegrationVersionLaravelServer\Http\Controllers\V1\
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use IntegrationHelper\IntegrationVersion\IntegrationVersionItemManagerInterface;
+use IntegrationHelper\IntegrationVersion\IntegrationVersionManagerInterface;
 use IntegrationHelper\IntegrationVersionLaravel\Repositories\IntegrationVersionRepository;
 use IntegrationHelper\IntegrationVersionLaravelServer\PrepareResultProcessor;
 use Webkul\RestApi\Http\Controllers\V1\Admin\AdminController;
@@ -26,6 +27,7 @@ class IntegrationVersionController extends AdminController
      */
     public function __construct(
         protected IntegrationVersionRepository $integrationVersionRepository,
+        protected IntegrationVersionManagerInterface $integrationVersionManager,
         protected IntegrationVersionItemManagerInterface $integrationVersionItemManager
     ) {
         parent::__construct();
@@ -70,7 +72,7 @@ class IntegrationVersionController extends AdminController
             $message = $e->getMessage();
             $isError = true;
             $hash = '';
-            $updatedAt = '';
+            $hashDateTime = '';
         }
 
         return new JsonResponse([
@@ -147,5 +149,40 @@ class IntegrationVersionController extends AdminController
             'hash_date_time' => $hashDateTime
         ]);
     }
+
+    public function getDeletedIdentities()
+    {
+        $identities = [];
+        $isError = false;
+        $message = 'Success';
+        try {
+            $this->validate(request(), [
+                'source' => 'required',
+                'identities_for_check' => 'required|array',
+            ]);
+
+            $source = request()->get('source');
+            $identitiesForCheck = request()->get('identities_for_check');
+
+            $item = $this->integrationVersionRepository->getItemBySource($source);
+            if($item && $item->getIdValue()) {
+                $identities = $this->integrationVersionManager
+                    ->getDeletedIdentities($source, $identitiesForCheck);
+
+            } else {
+                throw new \Exception(sprintf('Integration version for source %s not found.', $source));
+            }
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $isError = true;
+        }
+
+        return new JsonResponse([
+            'identities_for_delete' => $identities,
+            'message' => $message,
+            'is_error' => $isError
+        ]);
+    }
+
 
 }
