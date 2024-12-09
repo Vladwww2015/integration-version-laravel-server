@@ -24,6 +24,6 @@ class RunReindexQueue implements ShouldQueue
     public function handle()
     {
         app(\IntegrationHelper\IntegrationVersionLaravelServer\Service\ResetIndex::class)->execute($this->source);
-        app(\IntegrationHelper\IntegrationVersionLaravelServer\Service\RunReindex::class)->run($this->source);
+        app(\IntegrationHelper\IntegrationVersionLaravelServer\Service\RunReindex::class)->execute($this->source);
     }
 }
