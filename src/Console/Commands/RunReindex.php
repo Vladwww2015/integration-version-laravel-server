@@ -3,6 +3,7 @@
 namespace IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands;
 
 use Illuminate\Console\Command;
+use IntegrationHelper\IntegrationVersionLaravelServer\Jobs\RunReindexQueue;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'integration-version:run-reindex')]
@@ -24,13 +25,6 @@ class RunReindex extends Command
      */
     protected $description = 'Run Index by Source';
 
-    public function __construct(
-        protected \IntegrationHelper\IntegrationVersionLaravelServer\Service\RunReindex $runReindex
-    )
-    {
-        parent::__construct();
-    }
-
     /**
      * Execute the console command.
      */
@@ -42,6 +36,6 @@ class RunReindex extends Command
             throw new \Exception('Param source is required');
         }
 
-        $this->runReindex->execute($source);
+        dispatch(new RunReindexQueue($source));
     }
 }

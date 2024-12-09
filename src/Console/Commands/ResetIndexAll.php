@@ -26,8 +26,7 @@ class ResetIndexAll extends Command
 
     public function __construct(
         protected \IntegrationHelper\IntegrationVersionLaravelServer\Service\ResetIndexAll $resetIndexAll
-    )
-    {
+    ){
         parent::__construct();
     }
 

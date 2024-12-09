@@ -22,7 +22,7 @@ class ResetIndex extends Command
      *
      * @var string
      */
-    protected $description = 'Reset All Indexes';
+    protected $description = 'Reset Index by Source';
 
     public function __construct(
         protected \IntegrationHelper\IntegrationVersionLaravelServer\Service\ResetIndex $resetIndex
