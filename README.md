@@ -33,7 +33,7 @@ use IntegrationHelper\IntegrationVersion\Context;
 ```
 Use POST http method: 
 
-    api/v1/admin/integration-version/get-identities
+    1) api/v1/admin/integration-version/get-identities
     Return identites for cur source
     Params: 
     - source - source code
@@ -42,15 +42,21 @@ Use POST http method:
     - page > 0
     - limit > 499
     
-    api/v1/admin/integration-version/get-latest-hash
+    2) api/v1/admin/integration-version/get-latest-hash
     Return latest hash and Hash Date Time
     Params: 
     - source - source code
     
-    api/v1/admin/integration-version/get-data-by-identities
+    3) api/v1/admin/integration-version/get-data-by-identities
     Return data by identities for source
      Params: 
         - source - source code
         - identities - lsit of identities
+        
+     get-deleted-identities
+    Return an array of deleted ids based on a check of incoming identites
+     Params: 
+        - source - source code
+        - identities_for_check - lsit of identities
     
 ```
