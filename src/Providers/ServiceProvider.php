@@ -3,6 +3,7 @@
 namespace IntegrationHelper\IntegrationVersionLaravelServer\Providers;
 
 use Illuminate\Support\Facades\Route;
+use IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands\ClearDeletedIndexes;
 use IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands\ResetAndRunIndexAllQueue;
 use IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands\ResetIndex;
 use IntegrationHelper\IntegrationVersionLaravelServer\Console\Commands\ResetIndexAll;
@@ -42,6 +43,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 ResetIndexAll::class,
                 RunReindex::class,
                 RunReindexAll::class,
+                ClearDeletedIndexes::class,
                 ResetAndRunIndexAllQueue::class
             ]);
         }

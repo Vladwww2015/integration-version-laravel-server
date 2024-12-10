@@ -20,10 +20,8 @@ class ResetAndRunIndexAllQueue extends Command
      * @param IntegrationVersionRepositoryInterface $integrationVersionRepository
      */
     public function __construct(
-        protected \IntegrationHelper\IntegrationVersionLaravelServer\Service\ResetIndexAll $resetIndexAll,
         protected IntegrationVersionRepositoryInterface $integrationVersionRepository
-    )
-    {
+    ){
         parent::__construct();
     }
 
@@ -32,8 +30,6 @@ class ResetAndRunIndexAllQueue extends Command
      */
     public function handle()
     {
-        $this->resetIndexAll->execute();
-
         /**
          * @var $item IntegrationVersionInterface
          */
