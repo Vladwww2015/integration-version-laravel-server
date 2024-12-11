@@ -16,7 +16,6 @@ class ResetAndRunIndexAllQueue extends Command
     protected $description = 'Reset All And Run Indexes with queue';
 
     /**
-     * @param \IntegrationHelper\IntegrationVersionLaravelServer\Service\ResetIndexAll $resetIndexAll
      * @param IntegrationVersionRepositoryInterface $integrationVersionRepository
      */
     public function __construct(
