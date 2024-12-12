@@ -22,8 +22,7 @@ class ClearDeletedIndexes
         /**
          * @var $item IntegrationVersionItemInterface
          */
-        $idsToDelete = [];
-        $sources = [];
+        $idsToDelete = $sources = [];
         $locker = Cache::lock('integration-version-clear-deleted', 3600);
 
         if($locker->get()) {
@@ -34,23 +33,36 @@ class ClearDeletedIndexes
                 foreach ($items as $item) {
                     $idsToDelete[] = $item->getIdValue();
                     $sources[$item->getParentId()] = $item->getParentId();
-                }
-            }
-            $hashDateTime = Context::getInstance()->getDateTime()->getNow();
-
-            if($idsToDelete) {
-                foreach (array_chunk($idsToDelete, 1000) as $chunk) {
-                    $this->integrationVersionItemManager->delete($chunk);
-                }
-                if($sources) {
-                    foreach ($sources as $sourceId) {
-                        $inventoryVersion = $this->integrationVersionRepository->getItemById($sourceId);
-                        $hash = Context::getInstance()->getHashGenerator()->generate($inventoryVersion->getSource());
-                        $this->integrationVersionManager->saveNewHash($inventoryVersion->getSource(), $hash, $hashDateTime);
+                    if(count($idsToDelete) > 20000) {
+                        $this->_delete($idsToDelete);
+                        $idsToDelete = [];
                     }
                 }
             }
+
+            $this->_updateHash($sources);
+
             $locker->forceRelease();
+        }
+    }
+
+    protected function _updateHash(array $sources)
+    {
+        if($sources) {
+            $hashDateTime = Context::getInstance()->getDateTime()->getNow();
+            foreach ($sources as $sourceId) {
+                $inventoryVersion = $this->integrationVersionRepository->getItemById($sourceId);
+                $hash = Context::getInstance()->getHashGenerator()->generate($inventoryVersion->getSource());
+                $this->integrationVersionManager->saveNewHash($inventoryVersion->getSource(), $hash, $hashDateTime);
+            }
+        }
+    }
+    protected function _delete(array $ids)
+    {
+        if($ids) {
+            foreach (array_chunk($ids, 1000) as $chunkIds) {
+                $this->integrationVersionItemManager->delete($chunkIds);
+            }
         }
     }
 }
