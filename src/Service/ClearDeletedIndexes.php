@@ -26,7 +26,7 @@ class ClearDeletedIndexes
         $sources = [];
         $locker = Cache::lock('integration-version-clear-deleted', 3600);
 
-        if($locker->get() === false) {
+        if($locker->get()) {
             foreach (
                 $this->integrationVersionItemManager->getItemsWithDeletedStatus() as
                 $items
@@ -50,6 +50,7 @@ class ClearDeletedIndexes
                     }
                 }
             }
+            $locker->forceRelease();
         }
     }
 }
