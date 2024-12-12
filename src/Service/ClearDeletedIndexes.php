@@ -38,11 +38,13 @@ class ClearDeletedIndexes
                         $idsToDelete = [];
                     }
                 }
+                if($idsToDelete) $this->_delete($idsToDelete);
+                $idsToDelete = [];
             }
 
             $this->_updateHash($sources);
 
-            $locker->forceRelease();
+            $locker->release();
         }
     }
 
