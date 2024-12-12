@@ -6,10 +6,12 @@ use IntegrationHelper\IntegrationVersion\Context;
 use IntegrationHelper\IntegrationVersion\IntegrationVersionManagerInterface;
 use IntegrationHelper\IntegrationVersion\IntegrationVersionItemManagerInterface;
 use IntegrationHelper\IntegrationVersion\Model\IntegrationVersionItemInterface;
+use IntegrationHelper\IntegrationVersion\Repository\IntegrationVersionRepositoryInterface;
 
 class ClearDeletedIndexes
 {
     public function __construct(
+        protected IntegrationVersionRepositoryInterface $integrationVersionRepository,
         protected IntegrationVersionManagerInterface $integrationVersionManager,
         protected IntegrationVersionItemManagerInterface $integrationVersionItemManager
     ) {}
@@ -24,10 +26,12 @@ class ClearDeletedIndexes
 
         foreach (
             $this->integrationVersionItemManager->getItemsWithDeletedStatus() as
-            $item
+            $items
         ) {
-            $idsToDelete[] = $item->getIdValue();
-            $sources[$item->getParentId()] = $item->getParentId();
+            foreach ($items as $item) {
+                $idsToDelete[] = $item->getIdValue();
+                $sources[$item->getParentId()] = $item->getParentId();
+            }
         }
         $hashDateTime = Context::getInstance()->getDateTime()->getNow();
 
@@ -36,9 +40,10 @@ class ClearDeletedIndexes
                 $this->integrationVersionItemManager->delete($chunk);
             }
             if($sources) {
-                foreach ($sources as $source) {
-                    $hash = Context::getInstance()->getHashGenerator()->generate($source);
-                    $this->integrationVersionManager->saveNewHash($source, $hash, $hashDateTime);
+                foreach ($sources as $sourceId) {
+                    $inventoryVersion = $this->integrationVersionRepository->getItemById($sourceId);
+                    $hash = Context::getInstance()->getHashGenerator()->generate($inventoryVersion->getSource());
+                    $this->integrationVersionManager->saveNewHash($inventoryVersion->getSource(), $hash, $hashDateTime);
                 }
             }
         }
