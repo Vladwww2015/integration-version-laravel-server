@@ -36,6 +36,6 @@ class RunReindex extends Command
             throw new \Exception('Param source is required');
         }
 
-        dispatch(new RunReindexQueue($source));
+        (new RunReindexQueue($source))->handle();
     }
 }

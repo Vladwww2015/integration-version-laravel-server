@@ -33,7 +33,7 @@ class ResetAndRunIndexAllQueue extends Command
          * @var $item IntegrationVersionInterface
          */
         foreach ($this->integrationVersionRepository->getItems() as $item) {
-            dispatch(new RunReindexQueue($item->getSource()));
+            (new RunReindexQueue($item->getSource()))->handle();
         }
     }
 }

@@ -30,6 +30,7 @@ class ClearDeletedIndexes extends Command
      */
     public function handle()
     {
-        dispatch(new ClearDeletedIndexesDataQueue());
+        (new ClearDeletedIndexesDataQueue())->handle();
+//        dispatch(new ClearDeletedIndexesDataQueue());
     }
 }

@@ -17,7 +17,8 @@
 use IntegrationHelper\IntegrationVersionLaravelServer\Jobs\RunReindexQueue;
 
         $sourceCode = 'product_inventory';
-        dispatch(new RunReindexQueue($sourceCode));
+       
+        dispatch(new RunReindexQueue($sourceCode))->handle();
 
 ```
 ##### without queue
