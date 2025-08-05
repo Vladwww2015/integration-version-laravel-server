@@ -109,7 +109,9 @@ class IntegrationVersionController extends AdminController
             ); //TODO TODO TODO upd with source connection
 
         } catch (\Exception $e) {
-            $message = $e->getMessage();
+            $params = array_keys(request()->all());
+            $message = sprintf('Source param: %s. Param Keys: %s', request()->get('source'), implode(',', $params));
+            $message .= $e->getMessage();
             $isError = true;
         }
 
