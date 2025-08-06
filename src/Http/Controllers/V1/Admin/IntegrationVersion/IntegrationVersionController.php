@@ -40,6 +40,7 @@ class IntegrationVersionController extends AdminController
      */
     public function getIdentitiesTotal()
     {
+        $hash = '';
         $isError = false;
         $message = 'Success';
         try {
@@ -56,6 +57,8 @@ class IntegrationVersionController extends AdminController
 
             $item = $this->integrationVersionRepository->getItemBySource($source);
             if($item && $item->getIdValue()) {
+                $hash = $item->getHash();
+
                 $total = $this->integrationVersionItemManager
                     ->getIdentitiesTotalForNewestVersions($item->getIdValue(), $oldHash, $hashDateTimeParam);
 
@@ -70,6 +73,7 @@ class IntegrationVersionController extends AdminController
         return new JsonResponse([
             'total' => $total,
             'message' => $message,
+            'hash' => $hash,
             'is_error' => $isError
         ]);
     }
