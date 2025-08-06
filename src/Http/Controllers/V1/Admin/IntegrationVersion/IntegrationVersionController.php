@@ -34,6 +34,47 @@ class IntegrationVersionController extends AdminController
     }
 
     /**
+     * @return JsonResponse
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getIdentitiesTotal()
+    {
+        $isError = false;
+        $message = 'Success';
+        try {
+            $this->validate(request(), [
+                'source' => 'required',
+                'old_hash' => 'required',
+                'hash_date_time' => 'required|date_format:Y-m-d H:i:s',
+            ]);
+
+            $source = request()->get('source');
+            $oldHash = request()->get('old_hash');
+            $hashDateTimeParam = request()->get('hash_date_time');
+            $total = 0;
+
+            $item = $this->integrationVersionRepository->getItemBySource($source);
+            if($item && $item->getIdValue()) {
+                $total = $this->integrationVersionItemManager
+                    ->getIdentitiesTotalForNewestVersions($item->getIdValue(), $oldHash, $hashDateTimeParam);
+
+            } else {
+                throw new \Exception(sprintf('Item with source: %s not found', $source));
+            }
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $isError = true;
+        }
+
+        return new JsonResponse([
+            'total' => $total,
+            'message' => $message,
+            'is_error' => $isError
+        ]);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\View\View
@@ -67,6 +108,8 @@ class IntegrationVersionController extends AdminController
                 $identities = $this->integrationVersionItemManager
                     ->getIdentitiesForNewestVersions($item->getIdValue(), $oldHash, $hashDateTimeParam, $page, $limit);
 
+            } else {
+                throw new \Exception(sprintf('Item with source: %s not found', $source));
             }
         } catch (\Exception $e) {
             $message = $e->getMessage();
