@@ -41,6 +41,7 @@ class IntegrationVersionController extends AdminController
     public function getIdentitiesTotal()
     {
         $hash = '';
+        $total = 0;
         $isError = false;
         $message = 'Success';
         try {
@@ -53,7 +54,6 @@ class IntegrationVersionController extends AdminController
             $source = request()->get('source');
             $oldHash = request()->get('old_hash');
             $hashDateTimeParam = request()->get('hash_date_time');
-            $total = 0;
 
             $item = $this->integrationVersionRepository->getItemBySource($source);
             if($item && $item->getIdValue()) {
