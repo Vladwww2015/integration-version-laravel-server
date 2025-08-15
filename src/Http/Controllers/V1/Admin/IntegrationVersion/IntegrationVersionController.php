@@ -157,7 +157,7 @@ class IntegrationVersionController extends AdminController
 
         } catch (\Exception $e) {
             $params = array_keys(request()->all());
-            $message = sprintf('Source param: %s. Param Keys: %s', request()->get('source'), implode(',', $params));
+            $message = sprintf('Source param: %s. Param Keys: %s ||| ', request()->get('source'), implode(',', $params));
             $message .= $e->getMessage();
             $isError = true;
         }
