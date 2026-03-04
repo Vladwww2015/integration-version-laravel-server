@@ -88,13 +88,16 @@ class IntegrationVersionController extends AdminController
         $identities = [];
         $hashDateTime = '';
         $hash = '';
+        $nextCursor = null;
+        $hasMore = false;
         $isError = false;
         $message = 'Success';
         try {
             $this->validate(request(), [
                 'source' => 'required',
                 'old_hash' => 'required',
-                'page' => 'required|int|gt:0',
+                'page' => 'nullable|int|gt:0',
+                'cursor' => 'nullable|string',
                 'limit' => 'required|int|gt:499',
                 'hash_date_time' => 'required|date_format:Y-m-d H:i:s',
             ]);
@@ -102,15 +105,29 @@ class IntegrationVersionController extends AdminController
             $source = request()->get('source');
             $oldHash = request()->get('old_hash');
             $hashDateTimeParam = request()->get('hash_date_time');
-            $page = request()->get('page');
-            $limit = request()->get('limit');
+            $page = (int) (request()->get('page') ?: 1);
+            $limit = (int) request()->get('limit');
+            $cursor = request()->get('cursor');
 
             $item = $this->integrationVersionRepository->getItemBySource($source);
             if($item && $item->getIdValue()) {
                 $hash = $item->getHash();
                 $hashDateTime = $item->getHashDateTime();
-                $identities = $this->integrationVersionItemManager
-                    ->getIdentitiesForNewestVersions($item->getIdValue(), $oldHash, $hashDateTimeParam, $page, $limit);
+                if($cursor !== null && $cursor !== '') {
+                    $result = $this->integrationVersionItemManager
+                        ->getIdentitiesForNewestVersionsByCursor($item->getIdValue(), $oldHash, $hashDateTimeParam, $cursor, $limit);
+
+                    $identities = $result['items'] ?? [];
+                    $nextCursor = $result['next_cursor'] ?? null;
+                    $hasMore = (bool) ($result['has_more'] ?? false);
+                } else {
+                    $identities = $this->integrationVersionItemManager
+                        ->getIdentitiesForNewestVersions($item->getIdValue(), $oldHash, $hashDateTimeParam, $page, $limit);
+
+                    if(is_object($identities) && method_exists($identities, 'pluck')) {
+                        $identities = $identities->pluck('identity_value')->values();
+                    }
+                }
 
             } else {
                 throw new \Exception(sprintf('Item with source: %s not found', $source));
@@ -120,12 +137,16 @@ class IntegrationVersionController extends AdminController
             $isError = true;
             $hash = '';
             $hashDateTime = '';
+            $nextCursor = null;
+            $hasMore = false;
         }
 
         return new JsonResponse([
             'identities' => $identities,
             'latest_hash' => $hash,
             'hash_date_time' => $hashDateTime,
+            'next_cursor' => $nextCursor,
+            'has_more' => $hasMore,
             'message' => $message,
             'is_error' => $isError
         ]);
@@ -148,12 +169,14 @@ class IntegrationVersionController extends AdminController
                 throw new \Exception(sprintf('Integration version for source %s not found.', $source));
             }
             $identities = request()->get('identities');
+            $connection = $integrationVersion->getSourceConnection();
+            $query = DB::connection($connection ?: null)->table($integrationVersion->getTableName());
 
             $result = PrepareResultProcessor::getInstance()->prepare(
                 $source,
-                DB::table($integrationVersion->getTableName())
+                $query
                     ->whereIn($integrationVersion->getIdentityColumn(), $identities)->get()
-            ); //TODO TODO TODO upd with source connection
+            );
 
         } catch (\Exception $e) {
             $params = array_keys(request()->all());
